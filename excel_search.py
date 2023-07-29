@@ -151,6 +151,16 @@ def copy_to_clipboard():
     window.clipboard_append(a)
 
 
+def fix_keyboard_shortcuts(event):
+    ctrl = (event.state & 0x4) != 0
+    if event.keycode == 88 and ctrl and event.keysym.lower() != 'x':
+        event.widget.event_generate('<<Cut>>')
+    if event.keycode == 86 and ctrl and event.keysym.lower() != 'v':
+        event.widget.event_generate('<<Paste>>')
+    if event.keycode == 67 and ctrl and event.keysym.lower() != 'c':
+        event.widget.event_generate('<<Copy>>')
+
+
 window = Tk()
 window.title('Поиск ячеек по Excel файлу')
 win_width = 455
@@ -161,6 +171,7 @@ x_win_coord = (screen_width // 2 - win_width // 2) - 10
 y_win_coord = (screen_height // 2 - win_height // 2) - 10
 window.geometry(f'{win_width}x{win_height}+{x_win_coord}+{y_win_coord}')
 window.resizable(False, False)
+window.bind_all('<Key>', fix_keyboard_shortcuts, '+')
 
 frame = Frame(window, padx=10, pady=10)
 frame.pack(expand=True)
