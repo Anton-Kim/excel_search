@@ -97,7 +97,10 @@ def search():
             values_col = values_col.group()
             wb = xw.Book(filepath)
             try:
-                sht = wb.sheets[int(ent_list_num.get()) - 1]
+                if ent_list_num.get().isdigit():
+                    sht = wb.sheets[int(ent_list_num.get()) - 1]
+                else:
+                    sht = wb.sheets[ent_list_num.get()]
                 if letter_range:
                     file_length = len(pd.read_excel(filepath)) + 1
                 span = final_range if ':' in final_range else f'{letter_range.group()}1:{letter_range.group()}{file_length - 10}'
@@ -127,7 +130,8 @@ def search():
                     txt_result.insert(INSERT, chars='Совпадения не найдены.')
                     btn_copy['text'] = ''
                     btn_copy['state'] = 'disabled'
-            except:
+            except Exception as err:
+                print(err)
                 wb.app.quit()
                 messagebox.showwarning(title='Ошибка',
                                        message='Что-то пошло не так...')
