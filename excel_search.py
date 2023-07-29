@@ -1,5 +1,6 @@
 import re
 from tkinter import *
+from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 import pandas as pd
@@ -93,33 +94,38 @@ def search():
             final_range = letter_range.group() if letter_range else complex_range.group()
             values_col = values_col.group()
             wb = xw.Book(filepath)
-            sht = wb.sheets[int(ent_list_num.get()) - 1]
-            if letter_range:
-                file_length = len(pd.read_excel(filepath)) + 1
-            span = final_range if ':' in final_range else f'{letter_range.group()}1:{letter_range.group()}{file_length - 10}'
-            for r in sht.range(span):
-                if (s := r.value) and search_type_controller(search_type.get(), ent_search.get(), s):
-                    if is_colorize.get():
-                        r.color = tuple(int(i) for i in color.get().split(','))
-                    res.append(f'{values_col}{r.row}')
-            if is_colorize.get():
-                wb.save()
-            wb.app.quit()
-            final_res = ''
-            if is_expression.get():
-                final_res = ent_start_exp.get() + ent_delimiter.get().join(res) + ent_finish_exp.get()
-            else:
-                final_res = ', '.join(res)
-            if final_res:
-                txt_result.delete('1.0', END)
-                txt_result.insert(INSERT, chars=final_res)
-                btn_copy['text'] = 'скопировать в буфер'
-                btn_copy['state'] = 'normal'
-            else:
-                txt_result.delete('1.0', END)
-                txt_result.insert(INSERT, chars='Совпадения не найдены.')
-                btn_copy['text'] = ''
-                btn_copy['state'] = 'disabled'
+            try:
+                sht = wb.sheets[int(ent_list_num.get()) - 1]
+                if letter_range:
+                    file_length = len(pd.read_excel(filepath)) + 1
+                span = final_range if ':' in final_range else f'{letter_range.group()}1:{letter_range.group()}{file_length - 10}'
+                for r in sht.range(span):
+                    if (s := r.value) and search_type_controller(search_type.get(), ent_search.get(), s):
+                        if is_colorize.get():
+                            r.color = tuple(int(i) for i in color.get().split(','))
+                        res.append(f'{values_col}{r.row}')
+                if is_colorize.get():
+                    wb.save()
+                wb.app.quit()
+                final_res = ''
+                if is_expression.get():
+                    final_res = ent_start_exp.get() + ent_delimiter.get().join(res) + ent_finish_exp.get()
+                else:
+                    final_res = ', '.join(res)
+                if final_res:
+                    txt_result.delete('1.0', END)
+                    txt_result.insert(INSERT, chars=final_res)
+                    btn_copy['text'] = 'скопировать в буфер'
+                    btn_copy['state'] = 'normal'
+                else:
+                    txt_result.delete('1.0', END)
+                    txt_result.insert(INSERT, chars='Совпадения не найдены.')
+                    btn_copy['text'] = ''
+                    btn_copy['state'] = 'disabled'
+            except:
+                wb.app.quit()
+                messagebox.showwarning(title='Ошибка',
+                                       message='Что-то пошло не так...')
 
 
 def search_type_controller(tp, txt_1, txt_2):
@@ -150,6 +156,8 @@ def fix_keyboard_shortcuts(event):
         event.widget.event_generate('<<Paste>>')
     if event.keycode == 67 and ctrl and event.keysym.lower() != 'c':
         event.widget.event_generate('<<Copy>>')
+    if event.keycode == 65 and ctrl and event.keysym.lower() != 'a':
+        event.widget.event_generate("<<SelectAll>>")
 
 
 window = Tk()
@@ -240,7 +248,7 @@ btn_copy['state'] = 'disabled'
 txt_result = Text(frame, width=51, height=7, foreground='gray')
 txt_result.insert(INSERT, chars='Здесь будет результат поиска')
 
-scrollbar = Scrollbar(master=frame, orient=VERTICAL, command=txt_result.yview)
+scrollbar = Scrollbar(frame, orient=VERTICAL, command=txt_result.yview)
 txt_result['yscrollcommand'] = scrollbar.set
 
 lbl_file.grid(row=1, column=1, sticky=W)
