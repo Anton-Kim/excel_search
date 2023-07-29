@@ -2,6 +2,7 @@ import re
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
+import pandas as pd
 import xlwings as xw
 from idlelib.tooltip import Hovertip
 
@@ -94,17 +95,7 @@ def search():
             wb = xw.Book(filepath)
             sht = wb.sheets[int(ent_list_num.get()) - 1]
             if letter_range:
-                counter, file_length = 0, 1
-                for r in sht.range(f'{letter_range.group()}1:{letter_range.group()}100000'):
-                    if counter > 100:
-                        break
-                    else:
-                        if not r.value:
-                            file_length += 1
-                            counter += 1
-                        else:
-                            file_length += 1
-                            counter = 0
+                file_length = len(pd.read_excel(filepath)) + 1
             span = final_range if ':' in final_range else f'{letter_range.group()}1:{letter_range.group()}{file_length - 10}'
             for r in sht.range(span):
                 if (s := r.value) and search_type_controller(search_type.get(), ent_search.get(), s):
@@ -174,7 +165,7 @@ window.resizable(False, False)
 window.bind_all('<Key>', fix_keyboard_shortcuts, '+')
 
 frame = Frame(window, padx=10, pady=10)
-frame.pack(expand=True)
+frame.grid()
 
 filepath = ''
 search_type = StringVar(value='in')
@@ -246,8 +237,11 @@ lbl_warning = Label(frame, text='Все открытые окна Excel буду
 btn_search = Button(frame, text='Начать', command=search)
 btn_copy = Button(frame, text='', relief=FLAT, command=copy_to_clipboard)
 btn_copy['state'] = 'disabled'
-txt_result = Text(frame, width=54, height=7, foreground='gray')
+txt_result = Text(frame, width=51, height=7, foreground='gray')
 txt_result.insert(INSERT, chars='Здесь будет результат поиска')
+
+scrollbar = Scrollbar(master=frame, orient=VERTICAL, command=txt_result.yview)
+txt_result['yscrollcommand'] = scrollbar.set
 
 lbl_file.grid(row=1, column=1, sticky=W)
 btn_file.grid(row=1, column=2, sticky=W)
@@ -289,5 +283,6 @@ btn_search.grid(row=11, column=1, columnspan=2, sticky=W, padx=(5, 0), pady=(15,
 lbl_warning.grid(row=11, column=1, columnspan=2, sticky=W, padx=(65, 0), pady=(15, 10))
 btn_copy.grid(row=11, column=1, columnspan=2, sticky=SE, pady=(15, 0))
 txt_result.grid(row=12, column=1, columnspan=2, sticky=W)
+scrollbar.grid(row=12, column=1, columnspan=2, sticky=N+S, padx=(410, 0))
 
 window.mainloop()
