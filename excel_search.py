@@ -14,8 +14,8 @@ def choose_file():
         filetypes=(('Книга Excel', '*.xls;*.xlsx'), ('Все файлы', '*.*')))
     file_name = filepath.split('/')[-1]
     file_name = file_name if len(file_name) < 26 else file_name[:23] + '...'
-    lbl_choosen_file.configure(text=file_name)
-    lbl_choosen_file.configure(foreground='black')
+    lbl_choosen_file['text'] = file_name
+    lbl_choosen_file['foreground'] = 'black'
 
 
 def color_on():
@@ -79,23 +79,23 @@ def search():
         if not (letter_range or complex_range):
             messagebox.showwarning(title='Предупреждение',
                                    message='Некорректно задана колонка поиска.')
-        elif complex_range:
-            start_n = int(re.match(reg, ent_range.get()).group(2))
-            finish_n = int(re.match(reg, ent_range.get()).group(3))
-            if start_n <= finish_n:
-                messagebox.showwarning(title='Предупреждение',
-                                       message='Некорректно задан интервал '
-                                               'поиска.')
+        elif complex_range and int(
+                re.match(reg, ent_range.get()).group(2)) > int(
+                re.match(reg, ent_range.get()).group(3)):
+            messagebox.showwarning(title='Предупреждение',
+                                   message='Некорректно задан интервал поиска.')
         elif not values_col:
             messagebox.showwarning(title='Предупреждение',
                                    message='Некорректно задана колонка со '
                                            'значениями.')
         else:
+            final_range = letter_range.group() if letter_range else complex_range.group()
+            values_col = values_col.group()
             wb = xw.Book(filepath)
             sht = wb.sheets[int(ent_list_num.get()) - 1]
             if letter_range:
-                counter, inf, file_length = 0, int(float('inf')), 1
-                for r in sht.range(f'{letter_range}1:{letter_range}{inf}'):
+                counter, file_length = 0, 1
+                for r in sht.range(f'{letter_range.group()}1:{letter_range.group()}100000'):
                     if counter > 100:
                         break
                     else:
@@ -105,25 +105,56 @@ def search():
                         else:
                             file_length += 1
                             counter = 0
-            span = complex_range if complex_range else f'{ent_range}1:{ent_range}{file_length}'
+            span = final_range if ':' in final_range else f'{letter_range.group()}1:{letter_range.group()}{file_length - 10}'
             for r in sht.range(span):
-                if (s := r.value) and search == s:
-                    if is_color:
-                        r.is_color = tuple(int(i) for i in color.get().split(','))
+                if (s := r.value) and search_type_controller(search_type.get(), ent_search.get(), s):
+                    if is_colorize.get():
+                        r.color = tuple(int(i) for i in color.get().split(','))
                     res.append(f'{values_col}{r.row}')
-            if color:
+            if is_colorize.get():
                 wb.save()
             wb.app.quit()
-        if is_expression:
-            return ent_start_exp.get() + ent_delimiter.get().join(res) + ent_finish_exp.get()
-        else:
-            return ', '.join(res)
+            final_res = ''
+            if is_expression.get():
+                final_res = ent_start_exp.get() + ent_delimiter.get().join(res) + ent_finish_exp.get()
+            else:
+                final_res = ', '.join(res)
+            if final_res:
+                txt_result.delete('1.0', END)
+                txt_result.insert(INSERT, chars=final_res)
+                btn_copy['text'] = 'скопировать в буфер'
+                btn_copy['state'] = 'normal'
+            else:
+                txt_result.delete('1.0', END)
+                txt_result.insert(INSERT, chars='Совпадения не найдены.')
+                btn_copy['text'] = ''
+                btn_copy['state'] = 'disabled'
+
+
+def search_type_controller(tp, txt_1, txt_2):
+    str_txt_2 = str(txt_2)
+    if tp == 'in' and txt_1 in str_txt_2:
+        return True
+    elif tp == 'exact' and txt_1 == str_txt_2:
+        return True
+    elif tp == 'startswith' and txt_1.startswith(str_txt_2):
+        return True
+    elif tp == 'endswith' and txt_1.endswith(str_txt_2):
+        return True
+    else:
+        return False
+
+
+def copy_to_clipboard():
+    window.clipboard_clear()
+    a = txt_result.get('1.0', END)[:-1]
+    window.clipboard_append(a)
 
 
 window = Tk()
 window.title('Поиск ячеек по Excel файлу')
 win_width = 455
-win_height = 335
+win_height = 455
 screen_width = window.winfo_screenwidth()
 screen_height = window.winfo_screenheight()
 x_win_coord = (screen_width // 2 - win_width // 2) - 10
@@ -136,7 +167,7 @@ frame.pack(expand=True)
 
 filepath = ''
 search_type = StringVar(value='in')
-is_color = IntVar(value=0)
+is_colorize = IntVar(value=0)
 color = StringVar(value='146,208,80')
 is_expression = IntVar(value=0)
 
@@ -173,15 +204,15 @@ rad_endswith = Radiobutton(frame, text='Заканчивается', value='ends
 lbl_range = Label(frame, text='Колонка поиска  ')
 ent_range = Entry(frame, width=15)
 Hovertip(cvs_range, 'Буква колонки или диапазон ячеек в колонке латинскими\n'
-                    'буквами, например B1:B176')
+                    'заглавнми буквами, например B1:B176')
 lbl_values = Label(frame, text='Колонка со значениями  ')
 ent_values = Entry(frame, width=15)
 Hovertip(cvs_values, 'Буква колонки со значениями, ячейка которой при\n'
                      'нахождении искомогого текста в колонке поиска, будет\n'
                      'добавлена к результату')
 lbl_color = Label(frame, text='Окрасить ячейки с найденными совпаденями?  ')
-rad_no_color = Radiobutton(frame, text='Нет', value=0, variable=is_color, command=color_off)
-rad_color = Radiobutton(frame, text='Да', value=1, variable=is_color, command=color_on)
+rad_no_color = Radiobutton(frame, text='Нет', value=0, variable=is_colorize, command=color_off)
+rad_color = Radiobutton(frame, text='Да', value=1, variable=is_colorize, command=color_on)
 lbl_choose_color = Label(frame, text='Цвет:  ', foreground='gray')
 rad_color_green = Radiobutton(frame, image=img_color_green, value='146,208,80', variable=color, state='disabled')
 rad_color_yellow = Radiobutton(frame, image=img_color_yellow, value='255,255,0', variable=color, state='disabled')
@@ -202,6 +233,10 @@ lbl_finish_exp = Label(frame, text='В конец  ', foreground='gray')
 ent_finish_exp = Entry(frame, width=12, state='disabled')
 lbl_warning = Label(frame, text='Все открытые окна Excel будут закрыты!', foreground='red3')
 btn_search = Button(frame, text='Начать', command=search)
+btn_copy = Button(frame, text='', relief=FLAT, command=copy_to_clipboard)
+btn_copy['state'] = 'disabled'
+txt_result = Text(frame, width=54, height=7, foreground='gray')
+txt_result.insert(INSERT, chars='Здесь будет результат поиска')
 
 lbl_file.grid(row=1, column=1, sticky=W)
 btn_file.grid(row=1, column=2, sticky=W)
@@ -239,7 +274,9 @@ lbl_start_exp.grid(row=10, column=1, columnspan=2, sticky=W, padx=(140, 0))
 ent_start_exp.grid(row=10, column=1, columnspan=2, sticky=W, padx=(200, 0))
 lbl_finish_exp.grid(row=10, column=1, columnspan=2, sticky=W, padx=(300, 0))
 ent_finish_exp.grid(row=10, column=1, columnspan=2, sticky=E)
-btn_search.grid(row=11, column=1, columnspan=2, sticky=W, padx=(5, 0), pady=(20, 5))
-lbl_warning.grid(row=11, column=1, columnspan=2, sticky=W, padx=(65, 0), pady=(20, 5))
+btn_search.grid(row=11, column=1, columnspan=2, sticky=W, padx=(5, 0), pady=(15, 10))
+lbl_warning.grid(row=11, column=1, columnspan=2, sticky=W, padx=(65, 0), pady=(15, 10))
+btn_copy.grid(row=11, column=1, columnspan=2, sticky=SE, pady=(15, 0))
+txt_result.grid(row=12, column=1, columnspan=2, sticky=W)
 
 window.mainloop()
