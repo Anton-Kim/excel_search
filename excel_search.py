@@ -25,6 +25,7 @@ def color_on():
     rad_color_green['state'] = 'normal'
     rad_color_yellow['state'] = 'normal'
     rad_color_red['state'] = 'normal'
+    rad_color_off['state'] = 'normal'
     messagebox.showwarning(title='Предупреждение',
                            message='После запуска программы в файле будут '
                                    'автоматически окрашены найденные ячейки '
@@ -37,6 +38,7 @@ def color_off():
     rad_color_green['state'] = 'disabled'
     rad_color_yellow['state'] = 'disabled'
     rad_color_red['state'] = 'disabled'
+    rad_color_off['state'] = 'disabled'
 
 
 def expression_on():
@@ -102,7 +104,10 @@ def search():
                 for r in sht.range(span):
                     if (s := r.value) and search_type_controller(search_type.get(), ent_search.get(), s):
                         if is_colorize.get():
-                            r.color = tuple(int(i) for i in color.get().split(','))
+                            if color.get() == 'None':
+                                r.color = None
+                            else:
+                                r.color = tuple(int(i) for i in color.get().split(','))
                         res.append(f'{values_col}{r.row}')
                 if is_colorize.get():
                     wb.save()
@@ -184,6 +189,7 @@ is_expression = IntVar(value=0)
 img_color_green = PhotoImage(file='green.png')
 img_color_yellow = PhotoImage(file='yellow.png')
 img_color_red = PhotoImage(file='red.png')
+img_color_off = PhotoImage(file='no_color.png')
 tip = PhotoImage(file='tip.png')
 cvs_search = Canvas(frame, height=17, width=17)
 tip_search = cvs_search.create_image(2, 2, anchor=NW, image=tip)
@@ -227,6 +233,7 @@ lbl_choose_color = Label(frame, text='Цвет:  ', foreground='gray')
 rad_color_green = Radiobutton(frame, image=img_color_green, value='146,208,80', variable=color, state='disabled')
 rad_color_yellow = Radiobutton(frame, image=img_color_yellow, value='255,255,0', variable=color, state='disabled')
 rad_color_red = Radiobutton(frame, image=img_color_red, value='255,0,0', variable=color, state='disabled')
+rad_color_off = Radiobutton(frame, image=img_color_off, value='None', variable=color, state='disabled')
 lbl_expression = Label(frame, text='Составить выражение из результата?  ')
 rad_no_expression = Radiobutton(frame, text='Нет', value=0, variable=is_expression, command=expression_off)
 rad_expression = Radiobutton(frame, text='Да', value=1, variable=is_expression, command=expression_on)
@@ -277,6 +284,7 @@ lbl_choose_color.grid(row=8, column=1, columnspan=2, sticky=W)
 rad_color_green.grid(row=8, column=1, columnspan=2, sticky=W, padx=(45, 0))
 rad_color_yellow.grid(row=8, column=1, columnspan=2, sticky=W, padx=(150, 0))
 rad_color_red.grid(row=8, column=1, columnspan=2, sticky=W, padx=(255, 0))
+rad_color_off.grid(row=8, column=1, columnspan=2, sticky=W, padx=(360, 0))
 lbl_expression.grid(row=9, column=1, columnspan=2, sticky=W, pady=5)
 rad_no_expression.grid(row=9, column=1, columnspan=2, sticky=W, padx=(215, 0))
 rad_expression.grid(row=9, column=1, columnspan=2, sticky=W, padx=(265, 0))
