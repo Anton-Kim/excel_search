@@ -16,8 +16,12 @@ def choose_file():
         filetypes=(('Книга Excel', '*.xls;*.xlsx'), ('Все файлы', '*.*')))
     file_name = filepath.split('/')[-1]
     file_name = file_name if len(file_name) < 26 else file_name[:23] + '...'
-    lbl_choosen_file['text'] = file_name
-    lbl_choosen_file['foreground'] = 'black'
+    if file_name:
+        lbl_choosen_file['text'] = file_name
+        lbl_choosen_file['foreground'] = 'black'
+    elif not file_name and lbl_choosen_file['foreground'] != 'gray':
+        lbl_choosen_file['text'] = 'файл не выбран'
+        lbl_choosen_file['foreground'] = 'gray'
 
 
 def color_on():
