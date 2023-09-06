@@ -80,7 +80,6 @@ def search():
     if check_fields(filepath, ent_list_num.get(), ent_search.get(),
                     ent_range.get(), ent_values.get()):
         res, reg = [], r'([A-Z]+)(\d+):\1(\d+)'
-        re.match(r'\b[A-Z]+\b', ent_range.get())
         letter_range = re.match(r'\b[A-Z]+\b', ent_range.get())
         complex_range = re.match(reg, ent_range.get())
         values_col = re.match(r'\b[A-Z]+\b', ent_values.get())
@@ -106,8 +105,8 @@ def search():
                 else:
                     sht = wb.sheets[ent_list_num.get()]
                 if letter_range:
-                    file_length = len(pd.read_excel(filepath)) + 1
-                span = final_range if ':' in final_range else f'{letter_range.group()}1:{letter_range.group()}{file_length - 10}'
+                    file_length = len(pd.read_excel(filepath)) + 3
+                span = final_range if ':' in final_range else f'{letter_range.group()}1:{letter_range.group()}{file_length}'
                 for r in sht.range(span):
                     if (s := r.value) and search_type_controller(search_type.get(), ent_search.get(), s):
                         if is_colorize.get():
@@ -119,7 +118,6 @@ def search():
                 if is_colorize.get():
                     wb.save()
                 wb.app.quit()
-                final_res = ''
                 if is_expression.get():
                     final_res = ent_start_exp.get() + ent_delimiter.get().join(res) + ent_finish_exp.get()
                 else:
