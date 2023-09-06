@@ -1,6 +1,5 @@
 import re
 from tkinter import *
-from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 import pandas as pd
