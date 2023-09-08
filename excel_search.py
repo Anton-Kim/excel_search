@@ -12,7 +12,7 @@ cyrillic_str_lower = 'абвгдеёжзийклмнопрстуфхцчшщъы
 def choose_file():
     global filepath
     filepath = filedialog.askopenfilename(
-        filetypes=(('Книга Excel', '*.xls;*.xlsx'), ('Все файлы', '*.*')))
+        filetypes=(('Книга Excel', '*.xls;*.xlsx;*.xlsm'), ('Все файлы', '*.*')))
     file_name = filepath.split('/')[-1]
     file_name = file_name if len(file_name) < 26 else file_name[:23] + '...'
     if file_name:
