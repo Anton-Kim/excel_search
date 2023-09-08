@@ -173,6 +173,7 @@ def fix_keyboard_shortcuts(event):
 
 window = Tk()
 window.title('Поиск по Excel файлу')
+window.iconphoto(False, PhotoImage(file='win_icon.png'))
 win_width = 455
 win_height = 475
 screen_width = window.winfo_screenwidth()
