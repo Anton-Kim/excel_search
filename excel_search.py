@@ -1,8 +1,8 @@
-import re
 from tkinter import *
 from tkinter import filedialog, messagebox, ttk
-import pandas as pd
-import xlwings as xw
+from pandas import read_excel
+from xlwings import Book
+from re import match
 from idlelib.tooltip import Hovertip
 
 cyrillic_str_lower = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
@@ -80,15 +80,15 @@ def search():
     if check_fields(filepath, ent_list_num.get(), ent_search.get(),
                     ent_range.get(), ent_values.get()):
         res, reg = [], r'([A-Z]+)(\d+):\1(\d+)'
-        letter_range = re.match(r'\b[A-Z]+\b', ent_range.get())
-        complex_range = re.match(reg, ent_range.get())
-        values_col = re.match(r'\b[A-Z]+\b', ent_values.get())
+        letter_range = match(r'\b[A-Z]+\b', ent_range.get())
+        complex_range = match(reg, ent_range.get())
+        values_col = match(r'\b[A-Z]+\b', ent_values.get())
         if not (letter_range or complex_range):
             messagebox.showwarning(title='Предупреждение',
                                    message='Некорректно задана колонка поиска.')
         elif complex_range and int(
-                re.match(reg, ent_range.get()).group(2)) > int(
-                re.match(reg, ent_range.get()).group(3)):
+                match(reg, ent_range.get()).group(2)) > int(
+                match(reg, ent_range.get()).group(3)):
             messagebox.showwarning(title='Предупреждение',
                                    message='Некорректно задан интервал поиска.')
         elif not values_col:
@@ -98,14 +98,14 @@ def search():
         else:
             final_range = letter_range.group() if letter_range else complex_range.group()
             values_col = values_col.group()
-            wb = xw.Book(filepath)
+            wb = Book(filepath)
             try:
                 if ent_list_num.get().isdigit():
                     sht = wb.sheets[int(ent_list_num.get()) - 1]
                 else:
                     sht = wb.sheets[ent_list_num.get()]
                 if letter_range:
-                    file_length = len(pd.read_excel(filepath)) + 3
+                    file_length = len(read_excel(filepath)) + 3
                 span = final_range if ':' in final_range else f'{letter_range.group()}1:{letter_range.group()}{file_length}'
                 for r in sht.range(span):
                     if (s := r.value) and search_type_controller(search_type.get(), ent_search.get(), s):
@@ -348,26 +348,26 @@ def check_fields_uq(path, list_num, rng):
 def search_uq():
     if check_fields_uq(filepath_uq, ent_list_num_uq.get(), ent_range_uq.get()):
         res, reg = [], r'([A-Z]+)(\d+):\1(\d+)'
-        letter_range = re.match(r'\b[A-Z]+\b', ent_range_uq.get())
-        complex_range = re.match(reg, ent_range_uq.get())
+        letter_range = match(r'\b[A-Z]+\b', ent_range_uq.get())
+        complex_range = match(reg, ent_range_uq.get())
         if not (letter_range or complex_range):
             messagebox.showwarning(title='Предупреждение',
                                    message='Некорректно задана колонка поиска.')
         elif complex_range and int(
-                re.match(reg, ent_range_uq.get()).group(2)) > int(
-                re.match(reg, ent_range_uq.get()).group(3)):
+                match(reg, ent_range_uq.get()).group(2)) > int(
+                match(reg, ent_range_uq.get()).group(3)):
             messagebox.showwarning(title='Предупреждение',
                                    message='Некорректно задан интервал поиска.')
         else:
             final_range = letter_range.group() if letter_range else complex_range.group()
-            wb = xw.Book(filepath_uq)
+            wb = Book(filepath_uq)
             try:
                 if ent_list_num_uq.get().isdigit():
                     sht = wb.sheets[int(ent_list_num_uq.get()) - 1]
                 else:
                     sht = wb.sheets[ent_list_num_uq.get()]
                 if letter_range:
-                    file_length = len(pd.read_excel(filepath_uq)) + 3
+                    file_length = len(read_excel(filepath_uq)) + 3
                 span = final_range if ':' in final_range else f'{letter_range.group()}1:{letter_range.group()}{file_length}'
                 for r in sht.range(span):
                     if (s := r.value) and s not in res:
