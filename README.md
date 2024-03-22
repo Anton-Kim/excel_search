@@ -5,7 +5,7 @@
 
 ![image](https://github.com/Anton-Kim/excel_search/assets/99246811/0f3f22d3-d644-4fbb-bdb3-631c1d21c479)
 
-Скачать упакованный готовый к использованию дистрибутив приложения - [excel_search.zip](https://drive.google.com/file/d/1fNDiLu-KLPakvIvY5CvFk7W_2YRDcoCa/view?usp=sharing) (38 Mb).
+Скачать упакованный готовый к использованию дистрибутив приложения - [excel_search.zip](https://drive.google.com/file/d/1thvqQcsIF9x-uCb5bhDxFlTaSU1dhdK9/view?usp=sharing) (38 Mb).
 
 ### Основные функции:
 - приложение имеет свой графический интерфейс;
