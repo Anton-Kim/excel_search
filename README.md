@@ -33,7 +33,7 @@ pip install -U pyinstaller
 ```
 Упаковка проекта в отдельную независимую программу, которая после упаковки будет находиться в папке **dist**:
 ```
-pyinstaller -w -i=icon.ico --add-data 'green.png;.' --add-data 'red.png;.' --add-data 'yellow.png;.' --add-data 'no_color.png;.' --add-data 'tip.png;.' --clean excel_search.py
+pyinstaller -w -i=icon.ico --add-data 'green.png;.' --add-data 'red.png;.' --add-data 'yellow.png;.' --add-data 'no_color.png;.' --add-data 'tip.png;.' --add-data 'win_icon.png;.' --clean excel_search.py
 ```
 - иконку icon.ico (запускной .exe файл) можно использовать свою;
-- файлы green.png, red.png, yellow.png, no_color.png, tip.png - обязательны, т.к. являются частью интерфейса.
+- файлы green.png, red.png, yellow.png, no_color.png, tip.png, win_icon.png - обязательны, т.к. являются частью интерфейса. В последних версиях PyInstaller структура папок выходного дистрибутива может различаться. Поэтому, возможно, эти файлы необходимо будет перенести вручную в папку с исполнительным файлом.
